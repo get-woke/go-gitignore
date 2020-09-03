@@ -39,8 +39,7 @@ func cleanupTestDir() {
 // Validate "CompileIgnoreLines()"
 func TestCompileIgnoreLines(test *testing.T) {
 	lines := []string{"abc/def", "a/b/c", "b"}
-	object, error := CompileIgnoreLines(lines...)
-	assert.Nil(test, error, "error from CompileIgnoreLines should be nil")
+	object := CompileIgnoreLines(lines...)
 
 	// MatchesPath
 	// Paths which are targeted by the above "lines"
@@ -52,8 +51,7 @@ func TestCompileIgnoreLines(test *testing.T) {
 	assert.Equal(test, false, object.MatchesPath("def"), "def should not match")
 	assert.Equal(test, false, object.MatchesPath("bd"), "bd should not match")
 
-	object, error = CompileIgnoreLines("abc/def", "a/b/c", "b")
-	assert.Nil(test, error, "error from CompileIgnoreLines should be nil")
+	object = CompileIgnoreLines("abc/def", "a/b/c", "b")
 
 	// Paths which are targeted by the above "lines"
 	assert.Equal(test, true, object.MatchesPath("abc/def/child"), "abc/def/child should match")
@@ -67,9 +65,9 @@ func TestCompileIgnoreLines(test *testing.T) {
 
 // Validate the invalid files
 func TestCompileIgnoreFile_InvalidFile(test *testing.T) {
-	object, error := CompileIgnoreFile("./test_fixtures/invalid.file")
+	object, err := CompileIgnoreFile("./test_fixtures/invalid.file")
 	assert.Nil(test, object, "object should be nil")
-	assert.NotNil(test, error, "error should be unknown file / dir")
+	assert.NotNil(test, err, "error should be unknown file / dir")
 }
 
 // Validate the an empty files
@@ -224,10 +222,7 @@ func TestCompileIgnoreLines_HandleLeadingSlashPath(test *testing.T) {
 }
 
 func ExampleCompileIgnoreLines() {
-	ignoreObject, error := CompileIgnoreLines([]string{"node_modules", "*.out", "foo/*.c"}...)
-	if error != nil {
-		panic("Error when compiling ignore lines: " + error.Error())
-	}
+	ignoreObject := CompileIgnoreLines([]string{"node_modules", "*.out", "foo/*.c"}...)
 
 	// You can test the ignoreObject against various paths using the
 	// "MatchesPath()" interface method. This pretty much is up to
@@ -254,8 +249,7 @@ func TestCompileIgnoreLines_CheckNestedDotFiles(test *testing.T) {
 		"**/external/barfoo/less",
 		"**/external/barfoo/scss",
 	}
-	object, error := CompileIgnoreLines(lines...)
-	assert.Nil(test, error, "error from CompileIgnoreLines should be nil")
+	object := CompileIgnoreLines(lines...)
 	assert.NotNil(test, object, "returned object should not be nil")
 
 	assert.Equal(test, true, object.MatchesPath("external/foobar/angular.foo.css"), "external/foobar/angular.foo.css")
@@ -265,8 +259,7 @@ func TestCompileIgnoreLines_CheckNestedDotFiles(test *testing.T) {
 
 func TestCompileIgnoreLines_CarriageReturn(test *testing.T) {
 	lines := []string{"abc/def\r", "a/b/c\r", "b\r"}
-	object, error := CompileIgnoreLines(lines...)
-	assert.Nil(test, error, "error from CompileIgnoreLines should be nil")
+	object := CompileIgnoreLines(lines...)
 
 	assert.Equal(test, true, object.MatchesPath("abc/def/child"), "abc/def/child should match")
 	assert.Equal(test, true, object.MatchesPath("a/b/c/d"), "a/b/c/d should match")
@@ -281,8 +274,7 @@ func TestCompileIgnoreLines_WindowsPath(test *testing.T) {
 		return
 	}
 	lines := []string{"abc/def", "a/b/c", "b"}
-	object, error := CompileIgnoreLines(lines...)
-	assert.Nil(test, error, "error from CompileIgnoreLines should be nil")
+	object := CompileIgnoreLines(lines...)
 
 	assert.Equal(test, true, object.MatchesPath("abc\\def\\child"), "abc\\def\\child should match")
 	assert.Equal(test, true, object.MatchesPath("a\\b\\c\\d"), "a\\b\\c\\d should match")
@@ -290,8 +282,7 @@ func TestCompileIgnoreLines_WindowsPath(test *testing.T) {
 
 func TestWildCardFiles(test *testing.T) {
 	gitIgnore := []string{"*.swp", "/foo/*.wat", "bar/*.txt"}
-	object, err := CompileIgnoreLines(gitIgnore...)
-	assert.Nil(test, err, "error from CompileIgnoreLines should be nil")
+	object := CompileIgnoreLines(gitIgnore...)
 
 	// Paths which are targeted by the above "lines"
 	assert.Equal(test, true, object.MatchesPath("yo.swp"), "should ignore all swp files")
@@ -310,8 +301,7 @@ func TestWildCardFiles(test *testing.T) {
 
 func TestPrecedingSlash(test *testing.T) {
 	gitIgnore := []string{"/foo", "bar/"}
-	object, err := CompileIgnoreLines(gitIgnore...)
-	assert.Nil(test, err, "error from CompileIgnoreLines should be nil")
+	object := CompileIgnoreLines(gitIgnore...)
 
 	assert.Equal(test, true, object.MatchesPath("foo/bar.wat"), "should ignore all files in foo - nonpreceding /")
 	assert.Equal(test, true, object.MatchesPath("/foo/something.txt"), "should ignore all files in foo - preceding /")

@@ -163,7 +163,7 @@ type GitIgnore struct {
 // Accepts a variadic set of strings, and returns a GitIgnore object which
 // converts and appends the lines in the input to regexp.Regexp patterns
 // held within the GitIgnore objects "patterns" field
-func CompileIgnoreLines(lines ...string) (*GitIgnore, error) {
+func CompileIgnoreLines(lines ...string) *GitIgnore {
 	gi := &GitIgnore{}
 	for _, line := range lines {
 		pattern, negatePattern := getPatternFromLine(line)
@@ -172,7 +172,7 @@ func CompileIgnoreLines(lines ...string) (*GitIgnore, error) {
 			gi.patterns = append(gi.patterns, ip)
 		}
 	}
-	return gi, nil
+	return gi
 }
 
 // Accepts a ignore file as the input, parses the lines out of the file
