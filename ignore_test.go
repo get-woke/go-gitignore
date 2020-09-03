@@ -23,11 +23,12 @@ const (
 
 // Helper function to setup a test fixture dir and write to
 // it a file with the name "fname" and content "content"
-func writeFileToTestDir(fname, content string) {
+func writeFileToTestDir(fname, content string) string {
 	testDirPath := "." + string(filepath.Separator) + TEST_DIR
 	testFilePath := testDirPath + string(filepath.Separator) + fname
 	_ = os.MkdirAll(testDirPath, 0755)
 	_ = ioutil.WriteFile(testFilePath, []byte(content), os.ModePerm)
+	return testFilePath
 }
 
 func cleanupTestDir() {
@@ -72,11 +73,11 @@ func TestCompileIgnoreFile_InvalidFile(test *testing.T) {
 
 // Validate the an empty files
 func TestCompileIgnoreLines_EmptyFile(test *testing.T) {
-	writeFileToTestDir("test.gitignore", ``)
+	filename := writeFileToTestDir("test.gitignore", ``)
 	defer cleanupTestDir()
 
-	object, error := CompileIgnoreFile("./test_fixtures/test.gitignore")
-	assert.Nil(test, error, "error should be nil")
+	object, err := CompileIgnoreFile(filename)
+	assert.Nil(test, err, "error should be nil")
 	assert.NotNil(test, object, "object should not be nil")
 
 	assert.Equal(test, false, object.MatchesPath("a"), "should not match any path")
@@ -86,7 +87,7 @@ func TestCompileIgnoreLines_EmptyFile(test *testing.T) {
 
 // Validate the correct handling of the negation operator "!"
 func TestCompileIgnoreLines_HandleIncludePattern(test *testing.T) {
-	writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir("test.gitignore", `
 # exclude everything except directory foo/bar
 /*
 !/foo
@@ -95,8 +96,8 @@ func TestCompileIgnoreLines_HandleIncludePattern(test *testing.T) {
 `)
 	defer cleanupTestDir()
 
-	object, error := CompileIgnoreFile("./test_fixtures/test.gitignore")
-	assert.Nil(test, error, "error should be nil")
+	object, err := CompileIgnoreFile(filename)
+	assert.Nil(test, err, "error should be nil")
 	assert.NotNil(test, object, "object should not be nil")
 
 	assert.Equal(test, true, object.MatchesPath("a"), "a should match")
@@ -107,7 +108,7 @@ func TestCompileIgnoreLines_HandleIncludePattern(test *testing.T) {
 
 // Validate the correct handling of comments and empty lines
 func TestCompileIgnoreLines_HandleSpaces(test *testing.T) {
-	writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir("test.gitignore", `
 #
 # A comment
 
@@ -120,8 +121,8 @@ abc/def
 `)
 	defer cleanupTestDir()
 
-	object, error := CompileIgnoreFile("./test_fixtures/test.gitignore")
-	assert.Nil(test, error, "error should be nil")
+	object, err := CompileIgnoreFile(filename)
+	assert.Nil(test, err, "error should be nil")
 	assert.NotNil(test, object, "object should not be nil")
 
 	assert.Equal(test, 2, len(object.patterns), "should have two regex pattern")
@@ -131,15 +132,15 @@ abc/def
 
 // Validate the correct handling of leading / chars
 func TestCompileIgnoreLines_HandleLeadingSlash(test *testing.T) {
-	writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir("test.gitignore", `
 /a/b/c
 d/e/f
 /g
 `)
 	defer cleanupTestDir()
 
-	object, error := CompileIgnoreFile("./test_fixtures/test.gitignore")
-	assert.Nil(test, error, "error should be nil")
+	object, err := CompileIgnoreFile(filename)
+	assert.Nil(test, err, "error should be nil")
 	assert.NotNil(test, object, "object should not be nil")
 
 	assert.Equal(test, 3, len(object.patterns), "should have 3 regex patterns")
@@ -151,7 +152,7 @@ d/e/f
 
 // Validate the correct handling of files starting with # or !
 func TestCompileIgnoreLines_HandleLeadingSpecialChars(test *testing.T) {
-	writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir("test.gitignore", `
 # Comment
 \#file.txt
 \!file.txt
@@ -159,8 +160,8 @@ file.txt
 `)
 	defer cleanupTestDir()
 
-	object, error := CompileIgnoreFile("./test_fixtures/test.gitignore")
-	assert.Nil(test, error, "error should be nil")
+	object, err := CompileIgnoreFile(filename)
+	assert.Nil(test, err, "error should be nil")
 	assert.NotNil(test, object, "object should not be nil")
 
 	assert.Equal(test, true, object.MatchesPath("#file.txt"), "#file.txt should match")
@@ -174,13 +175,13 @@ file.txt
 
 // Validate the correct handling matching files only within a given folder
 func TestCompileIgnoreLines_HandleAllFilesInDir(test *testing.T) {
-	writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir("test.gitignore", `
 Documentation/*.html
 `)
 	defer cleanupTestDir()
 
-	object, error := CompileIgnoreFile("./test_fixtures/test.gitignore")
-	assert.Nil(test, error, "error should be nil")
+	object, err := CompileIgnoreFile(filename)
+	assert.Nil(test, err, "error should be nil")
 	assert.NotNil(test, object, "object should not be nil")
 
 	assert.Equal(test, true, object.MatchesPath("Documentation/git.html"), "Documentation/git.html should match")
@@ -190,14 +191,14 @@ Documentation/*.html
 
 // Validate the correct handling of "**"
 func TestCompileIgnoreLines_HandleDoubleStar(test *testing.T) {
-	writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir("test.gitignore", `
 **/foo
 bar
 `)
 	defer cleanupTestDir()
 
-	object, error := CompileIgnoreFile("./test_fixtures/test.gitignore")
-	assert.Nil(test, error, "error should be nil")
+	object, err := CompileIgnoreFile(filename)
+	assert.Nil(test, err, "error should be nil")
 	assert.NotNil(test, object, "object should not be nil")
 
 	assert.Equal(test, true, object.MatchesPath("foo"), "foo should match")
@@ -208,13 +209,13 @@ bar
 
 // Validate the correct handling of leading slash
 func TestCompileIgnoreLines_HandleLeadingSlashPath(test *testing.T) {
-	writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir("test.gitignore", `
 /*.c
 `)
 	defer cleanupTestDir()
 
-	object, error := CompileIgnoreFile("./test_fixtures/test.gitignore")
-	assert.Nil(test, error, "error should be nil")
+	object, err := CompileIgnoreFile(filename)
+	assert.Nil(test, err, "error should be nil")
 	assert.NotNil(test, object, "object should not be nil")
 
 	assert.Equal(test, true, object.MatchesPath("hello.c"), "hello.c should match")
