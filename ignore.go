@@ -214,3 +214,27 @@ func (gi *GitIgnore) MatchesPath(f string) bool {
 	}
 	return matchesPath
 }
+
+// AddPatternsFromFiles appends the patterns returned from CompileIgnoreLines
+// to the current GitIgnore object.
+// It returns the object, which means it can be chained
+func (gi *GitIgnore) AddPatternsFromFiles(fpaths ...string) *GitIgnore {
+	for _, fpath := range fpaths {
+		_gi, err := CompileIgnoreFile(fpath)
+		if err != nil {
+			return gi
+		}
+		gi.patterns = append(gi.patterns, _gi.patterns...)
+	}
+
+	return gi
+}
+
+// AddPatternsFromLines appends the patterns returned from CompileIgnoreLines
+// to the current GitIgnore object.
+// It returns the object, which means it can be chained
+func (gi *GitIgnore) AddPatternsFromLines(lines ...string) *GitIgnore {
+	_gi := CompileIgnoreLines(lines...)
+	gi.patterns = append(gi.patterns, _gi.patterns...)
+	return gi
+}

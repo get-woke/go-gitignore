@@ -64,6 +64,41 @@ func TestCompileIgnoreLines(test *testing.T) {
 	assert.Equal(test, false, object.MatchesPath("bd"), "bd should not match")
 }
 
+func TestCompileIgnoreLines_AddPattersFromLines(test *testing.T) {
+	object := CompileIgnoreLines("abc/def", "a/b/c", "b").AddPatternsFromLines("efg/hij")
+
+	// Paths which are targeted by the above "lines"
+	assert.Equal(test, true, object.MatchesPath("abc/def/child"), "abc/def/child should match")
+	assert.Equal(test, true, object.MatchesPath("efg/hij/child"), "efg/hij/child should match")
+	assert.Equal(test, true, object.MatchesPath("a/b/c/d"), "a/b/c/d should match")
+
+	// Paths which are not targeted by the above "lines"
+	assert.Equal(test, false, object.MatchesPath("abc"), "abc should not match")
+	assert.Equal(test, false, object.MatchesPath("def"), "def should not match")
+	assert.Equal(test, false, object.MatchesPath("bd"), "bd should not match")
+	assert.Equal(test, false, object.MatchesPath("efg"), "efg should not match")
+}
+
+func TestCompileIgnoreLines_AddPattersFromFiles(test *testing.T) {
+	filename := writeFileToTestDir("test.gitignore", `
+efg/hij
+`)
+	defer cleanupTestDir()
+
+	object := CompileIgnoreLines("abc/def", "a/b/c", "b").AddPatternsFromFiles(filename)
+
+	// Paths which are targeted by the above "lines"
+	assert.Equal(test, true, object.MatchesPath("abc/def/child"), "abc/def/child should match")
+	assert.Equal(test, true, object.MatchesPath("efg/hij/child"), "efg/hij/child should match")
+	assert.Equal(test, true, object.MatchesPath("a/b/c/d"), "a/b/c/d should match")
+
+	// Paths which are not targeted by the above "lines"
+	assert.Equal(test, false, object.MatchesPath("abc"), "abc should not match")
+	assert.Equal(test, false, object.MatchesPath("def"), "def should not match")
+	assert.Equal(test, false, object.MatchesPath("bd"), "bd should not match")
+	assert.Equal(test, false, object.MatchesPath("efg"), "efg should not match")
+}
+
 // Validate the invalid files
 func TestCompileIgnoreFile_InvalidFile(test *testing.T) {
 	object, err := CompileIgnoreFile("./test_fixtures/invalid.file")
