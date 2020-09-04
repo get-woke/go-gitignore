@@ -58,6 +58,20 @@ import (
 	"strings"
 )
 
+const magicStar = "#$~"
+
+var (
+	// Pre-compile regexes for getPatternFromLine
+	a = regexp.MustCompile(`^(\#|\!)`)
+	b = regexp.MustCompile(`([^\/+])/.*\*\.`)
+	c = regexp.MustCompile(`\.`)
+	d = regexp.MustCompile(`/\*\*/`)
+	e = regexp.MustCompile(`\*\*/`)
+	f = regexp.MustCompile(`/\*\*`)
+	g = regexp.MustCompile(`\\\*`)
+	h = regexp.MustCompile(`\*`)
+)
+
 ////////////////////////////////////////////////////////////
 
 // IgnoreParser is an interface which exposes a single method:
@@ -97,31 +111,29 @@ func getPatternFromLine(line string) (*regexp.Regexp, bool) {
 
 	// Handle [Rule 2, 4], when # or ! is escaped with a \
 	// Handle [Rule 4] once we tag negatePattern, strip the leading ! char
-	if regexp.MustCompile(`^(\#|\!)`).MatchString(line) {
+	if a.MatchString(line) {
 		line = line[1:]
 	}
 
 	// If we encounter a foo/*.blah in a folder, prepend the / char
-	if regexp.MustCompile(`([^\/+])/.*\*\.`).MatchString(line) && line[0] != '/' {
+	if b.MatchString(line) && line[0] != '/' {
 		line = "/" + line
 	}
 
 	// Handle escaping the "." char
-	line = regexp.MustCompile(`\.`).ReplaceAllString(line, `\.`)
-
-	magicStar := "#$~"
+	line = c.ReplaceAllString(line, `\.`)
 
 	// Handle "/**/" usage
 	if strings.HasPrefix(line, "/**/") {
 		line = line[1:]
 	}
-	line = regexp.MustCompile(`/\*\*/`).ReplaceAllString(line, `(/|/.+/)`)
-	line = regexp.MustCompile(`\*\*/`).ReplaceAllString(line, `(|.`+magicStar+`/)`)
-	line = regexp.MustCompile(`/\*\*`).ReplaceAllString(line, `(|/.`+magicStar+`)`)
+	line = d.ReplaceAllString(line, `(/|/.+/)`)
+	line = e.ReplaceAllString(line, `(|.`+magicStar+`/)`)
+	line = f.ReplaceAllString(line, `(|/.`+magicStar+`)`)
 
 	// Handle escaping the "*" char
-	line = regexp.MustCompile(`\\\*`).ReplaceAllString(line, `\`+magicStar)
-	line = regexp.MustCompile(`\*`).ReplaceAllString(line, `([^/]*)`)
+	line = g.ReplaceAllString(line, `\`+magicStar)
+	line = h.ReplaceAllString(line, `([^/]*)`)
 
 	// Handle escaping the "?" char
 	line = strings.Replace(line, "?", `\?`, -1)

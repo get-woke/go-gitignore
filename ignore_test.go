@@ -348,3 +348,31 @@ func TestPrecedingSlash(test *testing.T) {
 
 	assert.Equal(test, false, object.MatchesPath("something/foo/something.txt"), "should only ignore top level foo directories- not nested")
 }
+
+func BenchmarkCompileIgnoreLines(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		lines := []string{"abc/def", "a/b/c", "b"}
+		object := CompileIgnoreLines(lines...)
+
+		// MatchesPath
+		// Paths which are targeted by the above "lines"
+		assert.Equal(b, true, object.MatchesPath("abc/def/child"), "abc/def/child should match")
+		assert.Equal(b, true, object.MatchesPath("a/b/c/d"), "a/b/c/d should match")
+
+		// Paths which are not targeted by the above "lines"
+		assert.Equal(b, false, object.MatchesPath("abc"), "abc should not match")
+		assert.Equal(b, false, object.MatchesPath("def"), "def should not match")
+		assert.Equal(b, false, object.MatchesPath("bd"), "bd should not match")
+
+		object = CompileIgnoreLines("abc/def", "a/b/c", "b")
+
+		// Paths which are targeted by the above "lines"
+		assert.Equal(b, true, object.MatchesPath("abc/def/child"), "abc/def/child should match")
+		assert.Equal(b, true, object.MatchesPath("a/b/c/d"), "a/b/c/d should match")
+
+		// Paths which are not targeted by the above "lines"
+		assert.Equal(b, false, object.MatchesPath("abc"), "abc should not match")
+		assert.Equal(b, false, object.MatchesPath("def"), "def should not match")
+		assert.Equal(b, false, object.MatchesPath("bd"), "bd should not match")
+	}
+}
