@@ -246,7 +246,7 @@ func (gi *GitIgnore) AddPatternsFromFiles(fpaths ...string) *GitIgnore {
 // to the current GitIgnore object.
 // It returns the object, which means it can be chained
 func (gi *GitIgnore) AddPatternsFromLines(lines ...string) *GitIgnore {
-	i := CompileIgnoreLines(lines...)
-	gi.patterns = append(gi.patterns, i.patterns...)
+	patterns := CompileIgnoreLines(lines...).patterns
+	gi.patterns = append(gi.patterns, patterns...)
 	return gi
 }

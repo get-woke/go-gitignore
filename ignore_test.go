@@ -91,6 +91,44 @@ efg/hij
 	assert.False(test, object.MatchesPath("efg"), "efg should not match")
 }
 
+func TestCompileIgnoreLinesAddPattersFromFilesFileDoesntExist(test *testing.T) {
+	object := CompileIgnoreLines("abc/def", "a/b/c", "b").AddPatternsFromFiles("doesntexist")
+
+	// Paths which are targeted by the above "lines"
+	assert.True(test, object.MatchesPath("abc/def/child"), "abc/def/child should match")
+	assert.False(test, object.MatchesPath("efg/hij/child"), "efg/hij/child should not match")
+	assert.True(test, object.MatchesPath("a/b/c/d"), "a/b/c/d should match")
+
+	// Paths which are not targeted by the above "lines"
+	assert.False(test, object.MatchesPath("abc"), "abc should not match")
+	assert.False(test, object.MatchesPath("def"), "def should not match")
+	assert.False(test, object.MatchesPath("bd"), "bd should not match")
+	assert.False(test, object.MatchesPath("efg"), "efg should not match")
+}
+
+func TestCompileIgnoreFileAndLines(test *testing.T) {
+	filename := writeFileToTestDir(test, "test.gitignore", `
+efg/hij
+`)
+
+	object, err := CompileIgnoreFileAndLines(filename, "abc/def", "a/b/c", "b")
+	assert.NoError(test, err)
+
+	// Paths which are targeted by the above "lines"
+	assert.True(test, object.MatchesPath("abc/def/child"), "abc/def/child should match")
+	assert.True(test, object.MatchesPath("efg/hij/child"), "efg/hij/child should match")
+	assert.True(test, object.MatchesPath("a/b/c/d"), "a/b/c/d should match")
+
+	// Paths which are not targeted by the above "lines"
+	assert.False(test, object.MatchesPath("abc"), "abc should not match")
+	assert.False(test, object.MatchesPath("def"), "def should not match")
+	assert.False(test, object.MatchesPath("bd"), "bd should not match")
+	assert.False(test, object.MatchesPath("efg"), "efg should not match")
+
+	_, err = CompileIgnoreFileAndLines("doesntexist", "abc/def", "a/b/c", "b")
+	assert.Error(test, err)
+}
+
 // Validate the invalid files
 func TestCompileIgnoreFileInvalidFile(test *testing.T) {
 	object, err := CompileIgnoreFile("./test_fixtures/invalid.file")
