@@ -126,21 +126,21 @@ func TestStars(test *testing.T) {
 	shouldMatch(test, object, "foo/x/y/z.bar/")
 }
 
-func TestCases_Comment(test *testing.T) {
+func TestCasesComment(test *testing.T) {
 	lines := []string{"#abc"}
 	object := CompileIgnoreLines(lines...)
 
 	shouldNotMatch(test, object, "#abc")
 }
 
-func TestCases_EscapedComment(test *testing.T) {
+func TestCasesEscapedComment(test *testing.T) {
 	lines := []string{`\#abc`}
 	object := CompileIgnoreLines(lines...)
 
 	shouldMatch(test, object, "#abc")
 }
 
-func TestCases_CouldFilterPaths(test *testing.T) {
+func TestCasesCouldFilterPaths(test *testing.T) {
 	lines := []string{"abc", "!abc/b"}
 	object := CompileIgnoreLines(lines...)
 
@@ -148,7 +148,7 @@ func TestCases_CouldFilterPaths(test *testing.T) {
 	shouldNotMatch(test, object, "abc/b/b.js")
 }
 
-func TestCases_IgnoreSelect(test *testing.T) {
+func TestCasesIgnoreSelect(test *testing.T) {
 	lines := []string{"abc", "!abc/b", "#e", `\#f`}
 	object := CompileIgnoreLines(lines...)
 
@@ -158,7 +158,7 @@ func TestCases_IgnoreSelect(test *testing.T) {
 	shouldMatch(test, object, "#f")
 }
 
-func TestCases_EscapeRegexMetacharacters(test *testing.T) {
+func TestCasesEscapeRegexMetacharacters(test *testing.T) {
 	lines := []string{"*.js", `!\*.js`, "!a#b.js", "!?.js", "#abc", `\#abc`}
 	object := CompileIgnoreLines(lines...)
 
@@ -170,7 +170,7 @@ func TestCases_EscapeRegexMetacharacters(test *testing.T) {
 	shouldNotMatch(test, object, "?.js")
 }
 
-func TestCases_QuestionMark(test *testing.T) {
+func TestCasesQuestionMark(test *testing.T) {
 	lines := []string{"/.project", "thumbs.db", "*.swp", ".sonar/*", ".*.sw?"}
 	object := CompileIgnoreLines(lines...)
 
@@ -181,14 +181,14 @@ func TestCases_QuestionMark(test *testing.T) {
 	shouldMatch(test, object, "thumbs.db")
 }
 
-func TestCases_DirEndedWithStar(test *testing.T) {
+func TestCasesDirEndedWithStar(test *testing.T) {
 	lines := []string{"abc/*"}
 	object := CompileIgnoreLines(lines...)
 
 	shouldNotMatch(test, object, "abc")
 }
 
-func TestCases_FileEndedWithStar(test *testing.T) {
+func TestCasesFileEndedWithStar(test *testing.T) {
 	lines := []string{"abc.js*"}
 	object := CompileIgnoreLines(lines...)
 
@@ -198,7 +198,7 @@ func TestCases_FileEndedWithStar(test *testing.T) {
 	shouldMatch(test, object, "abc.jsa/abc")
 }
 
-func TestCases_WildcardAsFilename(test *testing.T) {
+func TestCasesWildcardAsFilename(test *testing.T) {
 	lines := []string{"*.b"}
 	object := CompileIgnoreLines(lines...)
 
@@ -208,7 +208,7 @@ func TestCases_WildcardAsFilename(test *testing.T) {
 	shouldMatch(test, object, "b/c/a.b")
 }
 
-func TestCases_SlashAtBeginningAndComeWithWildcard(test *testing.T) {
+func TestCasesSlashAtBeginningAndComeWithWildcard(test *testing.T) {
 	lines := []string{"/*.c"}
 	object := CompileIgnoreLines(lines...)
 
@@ -218,7 +218,7 @@ func TestCases_SlashAtBeginningAndComeWithWildcard(test *testing.T) {
 	shouldNotMatch(test, object, "c/d")
 }
 
-func TestCases_DotFile(test *testing.T) {
+func TestCasesDotFile(test *testing.T) {
 	lines := []string{".d"}
 	object := CompileIgnoreLines(lines...)
 
@@ -230,7 +230,7 @@ func TestCases_DotFile(test *testing.T) {
 	shouldNotMatch(test, object, "d/e")
 }
 
-func TestCases_DotDir(test *testing.T) {
+func TestCasesDotDir(test *testing.T) {
 	lines := []string{".e"}
 	object := CompileIgnoreLines(lines...)
 
@@ -243,7 +243,7 @@ func TestCases_DotDir(test *testing.T) {
 	shouldNotMatch(test, object, "e/f")
 }
 
-func TestCases_PatternOnce(test *testing.T) {
+func TestCasesPatternOnce(test *testing.T) {
 	lines := []string{"node_modules/"}
 	object := CompileIgnoreLines(lines...)
 
@@ -251,7 +251,7 @@ func TestCases_PatternOnce(test *testing.T) {
 	shouldMatch(test, object, "node_modules/gulp/node_modules/abc.json")
 }
 
-func TestCases_PatternTwice(test *testing.T) {
+func TestCasesPatternTwice(test *testing.T) {
 	lines := []string{"node_modules/", "node_modules/"}
 	object := CompileIgnoreLines(lines...)
 

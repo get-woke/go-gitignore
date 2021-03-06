@@ -232,11 +232,11 @@ func (gi *GitIgnore) MatchesPath(f string) bool {
 // It returns the object, which means it can be chained
 func (gi *GitIgnore) AddPatternsFromFiles(fpaths ...string) *GitIgnore {
 	for _, fpath := range fpaths {
-		_gi, err := CompileIgnoreFile(fpath)
+		i, err := CompileIgnoreFile(fpath)
 		if err != nil {
 			return gi
 		}
-		gi.patterns = append(gi.patterns, _gi.patterns...)
+		gi.patterns = append(gi.patterns, i.patterns...)
 	}
 
 	return gi
@@ -246,7 +246,7 @@ func (gi *GitIgnore) AddPatternsFromFiles(fpaths ...string) *GitIgnore {
 // to the current GitIgnore object.
 // It returns the object, which means it can be chained
 func (gi *GitIgnore) AddPatternsFromLines(lines ...string) *GitIgnore {
-	_gi := CompileIgnoreLines(lines...)
-	gi.patterns = append(gi.patterns, _gi.patterns...)
+	patterns := CompileIgnoreLines(lines...).patterns
+	gi.patterns = append(gi.patterns, patterns...)
 	return gi
 }
