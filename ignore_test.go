@@ -64,7 +64,7 @@ func TestCompileIgnoreLines(test *testing.T) {
 	assert.Equal(test, false, object.MatchesPath("bd"), "bd should not match")
 }
 
-func TestCompileIgnoreLines_AddPattersFromLines(test *testing.T) {
+func TestCompileIgnoreLinesAddPattersFromLines(test *testing.T) {
 	object := CompileIgnoreLines("abc/def", "a/b/c", "b").AddPatternsFromLines("efg/hij")
 
 	// Paths which are targeted by the above "lines"
@@ -79,7 +79,7 @@ func TestCompileIgnoreLines_AddPattersFromLines(test *testing.T) {
 	assert.Equal(test, false, object.MatchesPath("efg"), "efg should not match")
 }
 
-func TestCompileIgnoreLines_AddPattersFromFiles(test *testing.T) {
+func TestCompileIgnoreLinesAddPattersFromFiles(test *testing.T) {
 	filename := writeFileToTestDir("test.gitignore", `
 efg/hij
 `)
@@ -100,14 +100,14 @@ efg/hij
 }
 
 // Validate the invalid files
-func TestCompileIgnoreFile_InvalidFile(test *testing.T) {
+func TestCompileIgnoreFileInvalidFile(test *testing.T) {
 	object, err := CompileIgnoreFile("./test_fixtures/invalid.file")
 	assert.Nil(test, object, "object should be nil")
 	assert.NotNil(test, err, "error should be unknown file / dir")
 }
 
 // Validate the an empty files
-func TestCompileIgnoreLines_EmptyFile(test *testing.T) {
+func TestCompileIgnoreLinesEmptyFile(test *testing.T) {
 	filename := writeFileToTestDir("test.gitignore", ``)
 	defer cleanupTestDir()
 
@@ -121,7 +121,7 @@ func TestCompileIgnoreLines_EmptyFile(test *testing.T) {
 }
 
 // Validate the correct handling of the negation operator "!"
-func TestCompileIgnoreLines_HandleIncludePattern(test *testing.T) {
+func TestCompileIgnoreLinesHandleIncludePattern(test *testing.T) {
 	filename := writeFileToTestDir("test.gitignore", `
 # exclude everything except directory foo/bar
 /*
@@ -142,7 +142,7 @@ func TestCompileIgnoreLines_HandleIncludePattern(test *testing.T) {
 }
 
 // Validate the correct handling of comments and empty lines
-func TestCompileIgnoreLines_HandleSpaces(test *testing.T) {
+func TestCompileIgnoreLinesHandleSpaces(test *testing.T) {
 	filename := writeFileToTestDir("test.gitignore", `
 #
 # A comment
@@ -166,7 +166,7 @@ abc/def
 }
 
 // Validate the correct handling of leading / chars
-func TestCompileIgnoreLines_HandleLeadingSlash(test *testing.T) {
+func TestCompileIgnoreLinesHandleLeadingSlash(test *testing.T) {
 	filename := writeFileToTestDir("test.gitignore", `
 /a/b/c
 d/e/f
@@ -186,7 +186,7 @@ d/e/f
 }
 
 // Validate the correct handling of files starting with # or !
-func TestCompileIgnoreLines_HandleLeadingSpecialChars(test *testing.T) {
+func TestCompileIgnoreLinesHandleLeadingSpecialChars(test *testing.T) {
 	filename := writeFileToTestDir("test.gitignore", `
 # Comment
 \#file.txt
@@ -209,7 +209,7 @@ file.txt
 }
 
 // Validate the correct handling matching files only within a given folder
-func TestCompileIgnoreLines_HandleAllFilesInDir(test *testing.T) {
+func TestCompileIgnoreLinesHandleAllFilesInDir(test *testing.T) {
 	filename := writeFileToTestDir("test.gitignore", `
 Documentation/*.html
 `)
@@ -225,7 +225,7 @@ Documentation/*.html
 }
 
 // Validate the correct handling of "**"
-func TestCompileIgnoreLines_HandleDoubleStar(test *testing.T) {
+func TestCompileIgnoreLinesHandleDoubleStar(test *testing.T) {
 	filename := writeFileToTestDir("test.gitignore", `
 **/foo
 bar
@@ -243,7 +243,7 @@ bar
 }
 
 // Validate the correct handling of leading slash
-func TestCompileIgnoreLines_HandleLeadingSlashPath(test *testing.T) {
+func TestCompileIgnoreLinesHandleLeadingSlashPath(test *testing.T) {
 	filename := writeFileToTestDir("test.gitignore", `
 /*.c
 `)
@@ -274,7 +274,7 @@ func ExampleCompileIgnoreLines() {
 	// false
 }
 
-func TestCompileIgnoreLines_CheckNestedDotFiles(test *testing.T) {
+func TestCompileIgnoreLinesCheckNestedDotFiles(test *testing.T) {
 	lines := []string{
 		"**/external/**/*.md",
 		"**/external/**/*.json",
@@ -293,7 +293,7 @@ func TestCompileIgnoreLines_CheckNestedDotFiles(test *testing.T) {
 	assert.Equal(test, true, object.MatchesPath("external/barfoo/.bower.json"), "external/barfoo/.bower.json")
 }
 
-func TestCompileIgnoreLines_CarriageReturn(test *testing.T) {
+func TestCompileIgnoreLinesCarriageReturn(test *testing.T) {
 	lines := []string{"abc/def\r", "a/b/c\r", "b\r"}
 	object := CompileIgnoreLines(lines...)
 
@@ -305,7 +305,7 @@ func TestCompileIgnoreLines_CarriageReturn(test *testing.T) {
 	assert.Equal(test, false, object.MatchesPath("bd"), "bd should not match")
 }
 
-func TestCompileIgnoreLines_WindowsPath(test *testing.T) {
+func TestCompileIgnoreLinesWindowsPath(test *testing.T) {
 	if runtime.GOOS != "windows" {
 		return
 	}
