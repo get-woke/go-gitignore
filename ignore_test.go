@@ -15,24 +15,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	TEST_DIR = "test_fixtures"
-)
-
 ////////////////////////////////////////////////////////////
 
-// Helper function to setup a test fixture dir and write to
-// it a file with the name "fname" and content "content"
-func writeFileToTestDir(fname, content string) string {
-	testDirPath := "." + string(filepath.Separator) + TEST_DIR
-	testFilePath := testDirPath + string(filepath.Separator) + fname
-	_ = os.MkdirAll(testDirPath, 0755)
-	_ = ioutil.WriteFile(testFilePath, []byte(content), os.ModePerm)
-	return testFilePath
-}
-
-func cleanupTestDir() {
-	_ = os.RemoveAll(fmt.Sprintf(".%s%s", string(filepath.Separator), TEST_DIR))
+// writeFileToTestDir is a helper function to setup a temp directory for
+// the test and write to a file with the name "fname" and content "content"
+func writeFileToTestDir(test *testing.T, fname, content string) string {
+	dir := test.TempDir()
+	fpath := filepath.Join(dir, fname)
+	if err := ioutil.WriteFile(fpath, []byte(content), os.ModePerm); err != nil {
+		test.Fatalf("failed to write to file %s: %s", fpath, err)
+	}
+	return fpath
 }
 
 ////////////////////////////////////////////////////////////
@@ -80,10 +73,9 @@ func TestCompileIgnoreLinesAddPattersFromLines(test *testing.T) {
 }
 
 func TestCompileIgnoreLinesAddPattersFromFiles(test *testing.T) {
-	filename := writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir(test, "test.gitignore", `
 efg/hij
 `)
-	defer cleanupTestDir()
 
 	object := CompileIgnoreLines("abc/def", "a/b/c", "b").AddPatternsFromFiles(filename)
 
@@ -108,8 +100,7 @@ func TestCompileIgnoreFileInvalidFile(test *testing.T) {
 
 // Validate the an empty files
 func TestCompileIgnoreLinesEmptyFile(test *testing.T) {
-	filename := writeFileToTestDir("test.gitignore", ``)
-	defer cleanupTestDir()
+	filename := writeFileToTestDir(test, "test.gitignore", ``)
 
 	object, err := CompileIgnoreFile(filename)
 	assert.NoError(test, err)
@@ -122,14 +113,13 @@ func TestCompileIgnoreLinesEmptyFile(test *testing.T) {
 
 // Validate the correct handling of the negation operator "!"
 func TestCompileIgnoreLinesHandleIncludePattern(test *testing.T) {
-	filename := writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir(test, "test.gitignore", `
 # exclude everything except directory foo/bar
 /*
 !/foo
 /foo/*
 !/foo/bar
 `)
-	defer cleanupTestDir()
 
 	object, err := CompileIgnoreFile(filename)
 	assert.NoError(test, err)
@@ -143,7 +133,7 @@ func TestCompileIgnoreLinesHandleIncludePattern(test *testing.T) {
 
 // Validate the correct handling of comments and empty lines
 func TestCompileIgnoreLinesHandleSpaces(test *testing.T) {
-	filename := writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir(test, "test.gitignore", `
 #
 # A comment
 
@@ -157,7 +147,6 @@ abc/def
 \!shouldmatch
 !shouldnotmatch
 `)
-	defer cleanupTestDir()
 
 	object, err := CompileIgnoreFile(filename)
 	assert.NoError(test, err)
@@ -172,12 +161,11 @@ abc/def
 
 // Validate the correct handling of leading / chars
 func TestCompileIgnoreLinesHandleLeadingSlash(test *testing.T) {
-	filename := writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir(test, "test.gitignore", `
 /a/b/c
 d/e/f
 /g
 `)
-	defer cleanupTestDir()
 
 	object, err := CompileIgnoreFile(filename)
 	assert.NoError(test, err)
@@ -192,14 +180,13 @@ d/e/f
 
 // Validate the correct handling of files starting with # or !
 func TestCompileIgnoreLinesHandleLeadingSpecialChars(test *testing.T) {
-	filename := writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir(test, "test.gitignore", `
 # Comment
 \#file.txt
 \!file.txt
 file.txt
 !otherfile.txt
 `)
-	defer cleanupTestDir()
 
 	object, err := CompileIgnoreFile(filename)
 	assert.NoError(test, err)
@@ -218,10 +205,9 @@ file.txt
 
 // Validate the correct handling matching files only within a given folder
 func TestCompileIgnoreLinesHandleAllFilesInDir(test *testing.T) {
-	filename := writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir(test, "test.gitignore", `
 Documentation/*.html
 `)
-	defer cleanupTestDir()
 
 	object, err := CompileIgnoreFile(filename)
 	assert.NoError(test, err)
@@ -234,11 +220,10 @@ Documentation/*.html
 
 // Validate the correct handling of "**"
 func TestCompileIgnoreLinesHandleDoubleStar(test *testing.T) {
-	filename := writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir(test, "test.gitignore", `
 **/foo
 bar
 `)
-	defer cleanupTestDir()
 
 	object, err := CompileIgnoreFile(filename)
 	assert.NoError(test, err)
@@ -252,10 +237,9 @@ bar
 
 // Validate the correct handling of leading slash
 func TestCompileIgnoreLinesHandleLeadingSlashPath(test *testing.T) {
-	filename := writeFileToTestDir("test.gitignore", `
+	filename := writeFileToTestDir(test, "test.gitignore", `
 /*.c
 `)
-	defer cleanupTestDir()
 
 	object, err := CompileIgnoreFile(filename)
 	assert.NoError(test, err)
